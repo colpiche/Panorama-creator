@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-import numpy as np
-import skimage
 from skimage import feature, transform, io
 from skimage.color import rgb2gray
 from skimage.feature import plot_matches, ORB
