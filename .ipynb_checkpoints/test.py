@@ -3,6 +3,7 @@ from skimage import feature, transform, io
 from skimage.color import rgb2gray
 from skimage.feature import plot_matches, ORB
 from skimage.measure import ransac
+from skimage.util import img_as_ubyte
 import numpy as np
 
 
@@ -46,12 +47,12 @@ outliers = inliers == False
 
 """ On met la deuxième image à sa place """
 # TODO: Taille de l'image de sortie
-img_2_warped = transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1]))
+img_2_warped = img_as_ubyte(transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1])))
 
 """ On merge les deux images """
 # TODO: Blending
 result = np.copy(img_2_warped)
-result[:img_1.shape[0], :img_1.shape[1]] = img_1 / 255 # img1 passe en float à un moment, je sais pas quand ni pourquoi
+result[:img_1.shape[0], :img_1.shape[1]] = img_1
 
 
 """ Affichage """
