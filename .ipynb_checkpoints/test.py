@@ -3,6 +3,7 @@ from skimage import feature, transform, io
 from skimage.color import rgb2gray
 from skimage.feature import plot_matches, ORB
 from skimage.measure import ransac
+import numpy as np
 
 
 """ On charge deux images et on les fusionne en mode panoramique. On utilise 
@@ -12,6 +13,7 @@ from skimage.measure import ransac
 
 plt.rcParams['figure.figsize'] = (10, 10)
 
+# TODO: Lecture de plusieurs images
 img_1 = io.imread("images/small_image1.jpg")
 img_2 = io.imread("images/small_image2.jpg")
 
@@ -42,10 +44,14 @@ dst = keypoints_2[matches[:, 1]][:, ::-1]
 model_robust, inliers = ransac((src, dst), transform.AffineTransform, min_samples=3, residual_threshold=2, max_trials=100)
 outliers = inliers == False
 
+""" On met la deuxième image à sa place """
+# TODO: Taille de l'image de sortie
+img_2_warped = transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1]))
 
-""" On fusionne les images """
-result = transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1]))
-result[0:img_1.shape[0], 0:img_1.shape[1]] = img_1/255 #Uh ?
+""" On merge les deux images """
+# TODO: Blending
+result = np.copy(img_2_warped)
+result[:img_1.shape[0], :img_1.shape[1]] = img_1 / 255 # img1 passe en float à un moment, je sais pas quand ni pourquoi
 
 
 """ Affichage """
@@ -53,7 +59,7 @@ fig, ax = plt.subplots(nrows=2, ncols=2)
 ax[0][0].imshow(img_1)
 ax[0][0].set_title('Image 1')
 
-ax[0][1].imshow(img_2)
+ax[0][1].imshow(img_2_warped)
 ax[0][1].set_title('Image 2')
 
 plot_matches(ax[1][0], img_1, img_2, keypoints_1, keypoints_2, matches)
