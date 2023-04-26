@@ -11,6 +11,13 @@ import numpy as np
     ORB pour trouver les points d'intérêts et RANSAC pour les aligner.
 """
 
+def trim_image(image) :
+    mask = image == 0
+    rows = np.nonzero((~mask).sum(axis=1))
+    cols = np.nonzero((~mask).sum(axis=0))
+    trimmed = image[rows[0].min():rows[0].max()+1, cols[0].min():cols[0].max()+1,:]
+    return trimmed
+
 
 plt.rcParams['figure.figsize'] = (10, 10)
 
@@ -53,6 +60,7 @@ img_2_warped = img_as_ubyte(transform.warp(img_2, model_robust, output_shape=(im
 # TODO: Blending
 result = np.copy(img_2_warped)
 result[:img_1.shape[0], :img_1.shape[1]] = img_1
+result = trim_image(result)
 
 
 """ Affichage """
