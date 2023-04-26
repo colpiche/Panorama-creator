@@ -5,17 +5,18 @@ from skimage.feature import plot_matches, ORB
 from skimage.measure import ransac
 from skimage.util import img_as_ubyte
 import numpy as np
+import math
 
 
 """ On charge deux images et on les fusionne en mode panoramique. On utilise 
     ORB pour trouver les points d'intérêts et RANSAC pour les aligner.
 """
 
-def trim_image(image) :
+def trim_image(image, x_offset=0) :
     mask = image == 0
     rows = np.nonzero((~mask).sum(axis=1))
     cols = np.nonzero((~mask).sum(axis=0))
-    trimmed = image[rows[0].min():rows[0].max()+1, cols[0].min():cols[0].max()+1,:]
+    trimmed = image[rows[0].min():rows[0].max()+1, cols[0].min():cols[0].max()-x_offset,:]
     return trimmed
 
 
@@ -50,17 +51,26 @@ dst = keypoints_2[matches[:, 1]][:, ::-1]
 
 """ On aligne les images """
 model_robust, inliers = ransac((src, dst), transform.AffineTransform, min_samples=3, residual_threshold=2, max_trials=100)
+
+# La rotation retournée ne correspond pas toujours à la rotation appliquée
+# par transform.warp ci-dessous, laissant une partie du triangle noir à
+# l'image. Doublage de la valeur par sécurité.
+x_offset = 2 * int(abs(img_2.shape[0] * math.tan(model_robust.rotation)))
 outliers = inliers == False
+print(f'Rotation : {math.degrees(model_robust.rotation)} deg')
+print(f'{x_offset} px to delete on X axis')
+
 
 """ On met la deuxième image à sa place """
 # TODO: Taille de l'image de sortie
 img_2_warped = img_as_ubyte(transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1])))
 
+
 """ On merge les deux images """
 # TODO: Blending
 result = np.copy(img_2_warped)
 result[:img_1.shape[0], :img_1.shape[1]] = img_1
-result = trim_image(result)
+result = trim_image(result, x_offset)
 
 
 """ Affichage """
