@@ -86,7 +86,9 @@ if __name__ == "__main__":
     result = io.imread(l_images[-1])
 
     for i in range(1, len(l_images)):
-        result, kp, des = merge_images(io.imread(l_images[len(l_images)-i]), result, kp, des)
+        img_name = l_images[len(l_images)-i-1]
+        print(f'Merging {img_name}')
+        result, kp, des = merge_images(io.imread(img_name), result, kp, des)
 
     """ Affichage """
     fig, ax = plt.subplots(nrows=1, ncols=1)
