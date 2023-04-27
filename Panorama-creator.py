@@ -54,7 +54,7 @@ def merge_images(img_1, img_2, keypoints_2=None, descriptors_2=None):
 
     """ On aligne les images """
     model_robust, inliers = ransac((src, dst),
-                                   transform.AffineTransform,
+                                   transform.SimilarityTransform,
                                    min_samples=3,
                                    residual_threshold=2,
                                    max_trials=100)
