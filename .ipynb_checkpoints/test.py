@@ -30,9 +30,8 @@ def merge_images(img_1, img_2, keypoints_2 = None, descriptors_2 = None):
     keypoints_1 = orb.keypoints
     descriptors_1 = orb.descriptors
 
-    print(keypoints_2 is None, descriptors_2 is None)
     if keypoints_2 is None or descriptors_2 is None:
-        print("No keypoints found")
+        print("Keypoints non-transmis.")
         orb.detect_and_extract(rgb2gray(img_2))
         keypoints_2 = orb.keypoints
         descriptors_2 = orb.descriptors
