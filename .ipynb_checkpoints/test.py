@@ -22,69 +22,64 @@ def trim_image(image, x_offset=0) :
 
 plt.rcParams['figure.figsize'] = (10, 10)
 
-# TODO: Lecture de plusieurs images
-img_1 = io.imread("images/small_image1.jpg")
-img_2 = io.imread("images/small_image2.jpg")
+def merge_images(img_1, img_2):
+    """ Fusionne deux images en mode panoramique """
+
+    orb = ORB()
+    orb.detect_and_extract(rgb2gray(img_1))
+    keypoints_1 = orb.keypoints
+    descriptors_1 = orb.descriptors
+
+    orb.detect_and_extract(rgb2gray(img_2))
+    keypoints_2 = orb.keypoints
+    descriptors_2 = orb.descriptors
 
 
-""" On trouve les points d'intérêts """
-orb = ORB()
-orb.detect_and_extract(rgb2gray(img_1))
-keypoints_1 = orb.keypoints
-descriptors_1 = orb.descriptors
+    """ On trouve les correspondances """
+    matches = feature.match_descriptors(descriptors_1, descriptors_2, cross_check=True)
 
-orb.detect_and_extract(rgb2gray(img_2))
-keypoints_2 = orb.keypoints
-descriptors_2 = orb.descriptors
+    if keypoints_1 is None or keypoints_2 is None:
+        print("No keypoints found")
+        exit(0)
 
-
-""" On trouve les correspondances """
-matches = feature.match_descriptors(descriptors_1, descriptors_2, cross_check=True)
-
-if keypoints_1 is None or keypoints_2 is None:
-    print("No keypoints found")
-    exit(0)
-
-src = keypoints_1[matches[:, 0]][:, ::-1]
-dst = keypoints_2[matches[:, 1]][:, ::-1]
+    src = keypoints_1[matches[:, 0]][:, ::-1]
+    dst = keypoints_2[matches[:, 1]][:, ::-1]
 
 
-""" On aligne les images """
-model_robust, inliers = ransac((src, dst), transform.AffineTransform, min_samples=3, residual_threshold=2, max_trials=100)
+    """ On aligne les images """
+    model_robust, inliers = ransac((src, dst), transform.AffineTransform, min_samples=3, residual_threshold=2, max_trials=100)
 
-# La rotation retournée ne correspond pas toujours à la rotation appliquée
-# par transform.warp ci-dessous, laissant une partie du triangle noir à
-# l'image. Doublage de la valeur par sécurité.
-x_offset = 2 * int(abs(img_2.shape[0] * math.tan(model_robust.rotation)))
-outliers = inliers == False
-print(f'Rotation : {math.degrees(model_robust.rotation)} deg')
-print(f'{x_offset} px to delete on X axis')
-
-
-""" On met la deuxième image à sa place """
-# TODO: Taille de l'image de sortie
-img_2_warped = img_as_ubyte(transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1])))
+    # La rotation retournée ne correspond pas toujours à la rotation appliquée
+    # par transform.warp ci-dessous, laissant une partie du triangle noir à
+    # l'image. Doublage de la valeur par sécurité.
+    x_offset = 2 * int(abs(img_2.shape[0] * math.tan(model_robust.rotation)))
+    print(f'Rotation : {math.degrees(model_robust.rotation)} deg')
+    print(f'{x_offset} px to delete on X axis')
 
 
-""" On merge les deux images """
-# TODO: Blending
-result = np.copy(img_2_warped)
-result[:img_1.shape[0], :img_1.shape[1]] = img_1
-result = trim_image(result, x_offset)
+    """ On met la deuxième image à sa place """
+    img_2_warped = img_as_ubyte(transform.warp(img_2, model_robust, output_shape=(img_1.shape[0], img_1.shape[1] + img_2.shape[1])))
 
 
-""" Affichage """
-fig, ax = plt.subplots(nrows=2, ncols=2)
-ax[0][0].imshow(img_1)
-ax[0][0].set_title('Image 1')
+    """ On merge les deux images """
+    # TODO: Blending
+    result = np.copy(img_2_warped)
+    result[:img_1.shape[0], :img_1.shape[1]] = img_1
+    result = trim_image(result, x_offset)
 
-ax[0][1].imshow(img_2_warped)
-ax[0][1].set_title('Image 2')
+    return result
 
-plot_matches(ax[1][0], img_1, img_2, keypoints_1, keypoints_2, matches)
-ax[1][0].set_title('Correspondances')
 
-ax[1][1].imshow(result)
-ax[1][1].set_title('Résultat')
+if __name__ == "__main__":
+    l_images = ["images/small_image1.jpg", "images/small_image2.jpg", "images/small_image3.jpg", "images/small_image4.jpg", "images/small_image5.jpg"]
+    result = io.imread(l_images[0])
 
-plt.show()
+    for i in range(1, len(l_images)):
+        result = merge_images(result, io.imread(l_images[i]))
+
+    """ Affichage """
+    fig, ax = plt.subplots(nrows=1, ncols=1)
+    ax.imshow(result)
+    ax.set_title('Résultat')
+
+    plt.show()
