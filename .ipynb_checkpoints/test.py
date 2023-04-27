@@ -22,7 +22,7 @@ def trim_image(image, x_offset=0) :
 
 plt.rcParams['figure.figsize'] = (10, 10)
 
-def merge_images(img_1, img_2):
+def merge_images(img_1, img_2, keypoints_2 = None, descriptors_2 = None):
     """ Fusionne deux images en mode panoramique """
 
     orb = ORB()
@@ -30,10 +30,12 @@ def merge_images(img_1, img_2):
     keypoints_1 = orb.keypoints
     descriptors_1 = orb.descriptors
 
-    orb.detect_and_extract(rgb2gray(img_2))
-    keypoints_2 = orb.keypoints
-    descriptors_2 = orb.descriptors
-
+    print(keypoints_2 is None, descriptors_2 is None)
+    if keypoints_2 is None or descriptors_2 is None:
+        print("No keypoints found")
+        orb.detect_and_extract(rgb2gray(img_2))
+        keypoints_2 = orb.keypoints
+        descriptors_2 = orb.descriptors
 
     """ On trouve les correspondances """
     matches = feature.match_descriptors(descriptors_1, descriptors_2, cross_check=True)
@@ -67,15 +69,25 @@ def merge_images(img_1, img_2):
     result[:img_1.shape[0], :img_1.shape[1]] = img_1
     result = trim_image(result, x_offset)
 
-    return result
+    return result, keypoints_1, descriptors_1
 
 
 if __name__ == "__main__":
-    l_images = ["images/small_image1.jpg", "images/small_image2.jpg", "images/small_image3.jpg", "images/small_image4.jpg", "images/small_image5.jpg"]
-    result = io.imread(l_images[0])
+    kp = None
+    des = None
+
+    l_images = [
+        "images/small_image1.jpg",
+        "images/small_image2.jpg",
+        "images/small_image3.jpg",
+        "images/small_image4.jpg",
+        "images/small_image5.jpg"
+    ]
+    
+    result = io.imread(l_images[-1])
 
     for i in range(1, len(l_images)):
-        result = merge_images(result, io.imread(l_images[i]))
+        result, kp, des = merge_images(io.imread(l_images[len(l_images)-i]), result, kp, des)
 
     """ Affichage """
     fig, ax = plt.subplots(nrows=1, ncols=1)
