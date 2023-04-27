@@ -42,6 +42,7 @@ def merge_images(img_1, img_2, keypoints_2=None, descriptors_2=None):
     """ On trouve les correspondances """
     matches = feature.match_descriptors(descriptors_1,
                                         descriptors_2,
+                                        metric="hamming",
                                         cross_check=True)
 
     if keypoints_1 is None or keypoints_2 is None:
