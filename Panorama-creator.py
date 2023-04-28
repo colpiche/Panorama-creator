@@ -7,12 +7,13 @@ from skimage.util import img_as_ubyte
 import numpy as np
 import math
 
-plt.rcParams['figure.figsize'] = (10, 10)
-
 
 """ On charge deux images et on les fusionne en mode panoramique. On utilise
     ORB pour trouver les points d'intérêts et RANSAC pour les aligner.
 """
+
+
+FULL_RES_IMAGES = False
 
 
 def trim_image(image, x_offset=0):
@@ -86,12 +87,14 @@ if __name__ == "__main__":
     kp = None
     des = None
 
+    prefix = '' if FULL_RES_IMAGES else 'small_'
+
     l_images = [
-        "images/small_image1.jpg",
-        "images/small_image2.jpg",
-        "images/small_image3.jpg",
-        "images/small_image4.jpg",
-        "images/small_image5.jpg"
+        f'images/{prefix}image1.jpg',
+        f'images/{prefix}image2.jpg',
+        f'images/{prefix}image3.jpg',
+        f'images/{prefix}image4.jpg',
+        f'images/{prefix}image5.jpg'
     ]
 
     result = io.imread(l_images[-1])
@@ -102,6 +105,7 @@ if __name__ == "__main__":
         result, kp, des = merge_images(io.imread(img_name), result, kp, des)
 
     """ Affichage """
+    plt.rcParams['figure.figsize'] = (10, 10)
     fig, ax = plt.subplots(nrows=1, ncols=1)
     ax.imshow(result)
     ax.set_title('Résultat')
