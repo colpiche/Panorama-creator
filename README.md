@@ -4,8 +4,8 @@ Ce repository contient le logiciel Panorama creator permettant de créer automat
 
 ## Etapes de développement pas à pas
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/colpiche/Panorama-creator/HEAD?labpath=Panorama creator - Etape de développement.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/colpiche/Panorama-creator/HEAD?labpath=Panorama%20creator%20-%20Etape%20de%20d%C3%A9veloppement.ipynb)
 
 ## Script complet
 
-[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/colpiche/Panorama-creator/HEAD?labpath=Panorama creator - Full script.ipynb)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/colpiche/Panorama-creator/HEAD?labpath=Panorama%20creator%20-%20Full%20script.ipynb)
